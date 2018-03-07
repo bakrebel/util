@@ -1,0 +1,22 @@
+{
+  "name": "cryptonote-util",
+  "version": "0.0.4",
+  "main": "cryptonote",
+  "author": {
+    "name": "fonero-project",
+    "email": "danielebesi@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bakrebel/util.git"
+  },
+  "dependencies": {
+    "bindings": "*",
+    "nan": "^2.0.0"
+  },
+  "keywords": [
+    "fonero",
+    "cryptonight",
+    "cryptonote"
+  ]
+}
