@@ -3,8 +3,8 @@
   "version": "0.0.3",
   "main": "cryptonote",
   "author": {
-    "name": "fonero-project",
-    "email": "danielebesi@gmail.com"
+    "name": "LucasJones",
+    "email": "lucasjonesdev@hotmail.co.uk"
   },
   "repository": {
     "type": "git",
@@ -15,7 +15,6 @@
     "nan": "^2.0.0"
   },
   "keywords": [
-    "fonero",
     "cryptonight",
     "cryptonote"
   ]
