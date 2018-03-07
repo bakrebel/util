@@ -26,54 +26,18 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if(APPLE)
-  find_library(IOKIT_LIBRARY IOKit)
-  mark_as_advanced(IOKIT_LIBRARY)
-  list(APPEND EXTRA_LIBRARIES ${IOKIT_LIBRARY})
-endif()
+cmake_minimum_required (VERSION 2.6)
+project (fonero CXX)
 
-set(cryptonote_basic_sources
-  account.cpp
-  checkpoints.cpp
-  cryptonote_basic_impl.cpp
-  cryptonote_format_utils.cpp
-  difficulty.cpp
-  hardfork.cpp
-  miner.cpp)
+file(GLOB CRYPTONOTE_PROTOCOL *)
+source_group(cryptonote_protocol FILES ${CRYPTONOTE_PROTOCOL})
 
-set(cryptonote_basic_headers)
-
-set(cryptonote_basic_private_headers
-  account.h
-  account_boost_serialization.h
-  checkpoints.h
-  connection_context.h
-  cryptonote_basic.h
-  cryptonote_basic_impl.h
-  cryptonote_boost_serialization.h
-  cryptonote_format_utils.h
-  cryptonote_stat_info.h
-  difficulty.h
-  hardfork.h
-  miner.h
-  tx_extra.h
-  verification_context.h)
-
-fonero_private_headers(cryptonote_basic
-  ${crypto_private_headers})
-fonero_add_library(cryptonote_basic
-  ${cryptonote_basic_sources}
-  ${cryptonote_basic_headers}
-  ${cryptonote_basic_private_headers})
-target_link_libraries(cryptonote_basic
+#fonero_private_headers(cryptonote_protocol ${CRYPTONOTE_PROTOCOL})
+fonero_add_library(cryptonote_protocol ${CRYPTONOTE_PROTOCOL})
+target_link_libraries(cryptonote_protocol
   PUBLIC
-    common
-    cncrypto
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
+    p2p
   PRIVATE
     ${EXTRA_LIBRARIES})
+add_dependencies(cryptonote_protocol
+  version)
