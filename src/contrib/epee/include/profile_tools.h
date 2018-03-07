@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 #ifndef _PROFILE_TOOLS_H_
@@ -51,20 +51,13 @@ namespace epee
 #define PROFILE_FUNC_THIRD(immortal_ptr_str)
 #endif
 
-#define START_WAY_POINTS() uint64_t _____way_point_time = epee::misc_utils::get_tick_count();
-#define WAY_POINT(name) {uint64_t delta = epee::misc_utils::get_tick_count()-_____way_point_time; MDEBUG("Way point " << name << ": " << delta);_____way_point_time = misc_utils::get_tick_count();}
-#define WAY_POINT2(name, avrg_obj) {uint64_t delta = epee::misc_utils::get_tick_count()-_____way_point_time; avrg_obj.push(delta); MDEBUG("Way point " << name << ": " << delta);_____way_point_time = misc_utils::get_tick_count();}
+#define START_WAY_POINTS() uint64_t _____way_point_time = misc_utils::get_tick_count();
+#define WAY_POINT(name) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
+#define WAY_POINT2(name, avrg_obj) {uint64_t delta = misc_utils::get_tick_count()-_____way_point_time; avrg_obj.push(delta); LOG_PRINT("Way point " << name << ": " << delta, LOG_LEVEL_2);_____way_point_time = misc_utils::get_tick_count();}
 
 
-#define TIME_MEASURE_START(var_name)    uint64_t var_name = epee::misc_utils::get_tick_count();
-#define TIME_MEASURE_PAUSE(var_name)    var_name = epee::misc_utils::get_tick_count() - var_name;
-#define TIME_MEASURE_RESTART(var_name)  var_name = epee::misc_utils::get_tick_count() - var_name;
-#define TIME_MEASURE_FINISH(var_name)   var_name = epee::misc_utils::get_tick_count() - var_name;
-
-#define TIME_MEASURE_NS_START(var_name)    uint64_t var_name = epee::misc_utils::get_ns_count();
-#define TIME_MEASURE_NS_PAUSE(var_name)    var_name = epee::misc_utils::get_ns_count() - var_name;
-#define TIME_MEASURE_NS_RESTART(var_name)  var_name = epee::misc_utils::get_ns_count() - var_name;
-#define TIME_MEASURE_NS_FINISH(var_name)   var_name = epee::misc_utils::get_ns_count() - var_name;
+#define TIME_MEASURE_START(var_name)    uint64_t var_name = misc_utils::get_tick_count();
+#define TIME_MEASURE_FINISH(var_name)   var_name = misc_utils::get_tick_count() - var_name;
 
 namespace profile_tools
 {
@@ -74,7 +67,7 @@ namespace profile_tools
 		{}
 		~local_call_account()
 		{
-			MINFO("PROFILE "<<m_pname<<":av_time:\t" << (m_count_of_call ? (m_summary_time_used/m_count_of_call):0) <<" sum_time:\t"<<m_summary_time_used<<" call_count:\t" << m_count_of_call);
+			LOG_PRINT2("profile_details.log", "PROFILE "<<m_pname<<":av_time:\t" << (m_count_of_call ? (m_summary_time_used/m_count_of_call):0) <<" sum_time:\t"<<m_summary_time_used<<" call_count:\t" << m_count_of_call, LOG_LEVEL_0);
 		}
 
 		size_t m_count_of_call;

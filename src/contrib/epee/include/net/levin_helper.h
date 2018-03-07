@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 
@@ -30,9 +30,6 @@
 
 #include "levin_base.h"
 #include "serializeble_struct_helper.h"
-
-#undef FONERO_DEFAULT_LOG_CATEGORY
-#define FONERO_DEFAULT_LOG_CATEGORY "net"
 
 namespace epee
 {
@@ -94,7 +91,7 @@ namespace levin
 		}
 		if(head.m_cb != buff.size()-sizeof(levin::bucket_head))
 		{
-			LOG_PRINT_L3("sizes mismatch, at load_struct_from_levin_message");
+			LOG_PRINT_L3("sizes missmatch, at load_struct_from_levin_message");
 			return false;
 		}
 
@@ -121,7 +118,7 @@ namespace levin
 		}
 		if(head.m_cb != buff.size()-sizeof(levin::bucket_head))
 		{
-			LOG_ERROR("sizes mismatch, at load_struct_from_levin_message");
+			LOG_ERROR("sizes missmatch, at load_struct_from_levin_message");
 			return false;
 		}
 

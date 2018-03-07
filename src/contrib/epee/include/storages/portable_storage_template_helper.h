@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,12 +22,9 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 #pragma once
-
-#include <string>
-
 #include "parserse_base_utils.h"
 #include "portable_storage.h"
 #include "file_io_utils.h"
@@ -59,20 +56,20 @@ namespace epee
     }
     //-----------------------------------------------------------------------------------------------------------
     template<class t_struct>
-    bool store_t_to_json(t_struct& str_in, std::string& json_buff, size_t indent = 0, bool insert_newlines = true)
+    bool store_t_to_json(t_struct& str_in, std::string& json_buff, size_t indent = 0)
     {
       portable_storage ps;
       str_in.store(ps);
-      ps.dump_as_json(json_buff, indent, insert_newlines);
+      ps.dump_as_json(json_buff, indent);
       return true;
     }
     //-----------------------------------------------------------------------------------------------------------
     template<class t_struct>
-    std::string store_t_to_json(t_struct& str_in, size_t indent = 0, bool insert_newlines = true)
+    std::string store_t_to_json(t_struct& str_in, size_t indent = 0)
     {
       std::string json_buff;
-      store_t_to_json(str_in, json_buff, indent, insert_newlines);
-      return json_buff;
+      store_t_to_json(str_in, json_buff, indent);
+      return std::move(json_buff);
     }
     //-----------------------------------------------------------------------------------------------------------
     template<class t_struct>
@@ -117,7 +114,7 @@ namespace epee
     {
       std::string binary_buff;
       store_t_to_binary(str_in, binary_buff, indent);
-      return binary_buff;
+      return std::move(binary_buff);
     }
   }
 }

@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,14 +22,14 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 #ifndef _STRING_CODING_H_
 #define _STRING_CODING_H_
 
 #include <string>
-
+//#include "md5_l.h"
 namespace epee
 {
 namespace string_encoding
@@ -58,10 +58,27 @@ namespace string_encoding
 		if(!cb)
 			return str_trgt;
 		str_trgt.resize(cb);
-		::WideCharToMultiByte(  code_page, 0, str_from.data(), (int)str_from.size(),
+		::WideCharToMultiByte(  code_page, 0, str_from.data(), (int)str_from.size(), 
 			                        (char*)str_trgt.data(), (int)str_trgt.size(), 0, 0);
 		return str_trgt;*/
 	}
+#ifdef WINDOWS_PLATFORM_EX
+	inline std::string convert_to_ansii_win(const std::wstring& str_from)
+	{
+		
+		int code_page = CP_ACP;
+		std::string str_trgt;
+		if(!str_from.size())
+			return str_trgt;
+		int cb = ::WideCharToMultiByte( code_page, 0, str_from.data(), (__int32)str_from.size(), 0, 0, 0, 0  );
+		if(!cb)
+			return str_trgt;
+		str_trgt.resize(cb);
+		::WideCharToMultiByte(  code_page, 0, str_from.data(), (int)str_from.size(), 
+			                        (char*)str_trgt.data(), (int)str_trgt.size(), 0, 0);
+		return str_trgt;
+	}
+#endif
 
 	inline std::string convert_to_ansii(const std::string& str_from)
 	{
@@ -89,7 +106,7 @@ namespace string_encoding
 			return str_trgt;
 
 		str_trgt.resize(cb);
-		::MultiByteToWideChar( code_page, 0, str_from.data(),(int)str_from.size(),
+		::MultiByteToWideChar( code_page, 0, str_from.data(),(int)str_from.size(), 
 								(wchar_t*)str_trgt.data(),(int)str_trgt.size());
 		return str_trgt;*/
 	}
@@ -128,7 +145,7 @@ namespace string_encoding
 		return convert_to_unicode(str_from);
 	}
 
-	inline
+	inline 
 	std::string& base64_chars()
 	{
 
@@ -185,7 +202,7 @@ namespace string_encoding
 	}
 
 	inline
-		std::string base64_encode(const std::string& str)
+		std::string base64_encode(const std::string& str) 
 	{
 		return base64_encode((unsigned char const* )str.data(), str.size());
 	}
@@ -236,6 +253,41 @@ namespace string_encoding
 
 		return ret;
 	}
+
+	//md5
+#ifdef MD5_H
+  inline
+	std::string get_buf_as_hex_string(const void* pbuf, size_t len)
+	{
+		std::ostringstream result;
+
+		const unsigned char* p_buff = (const unsigned char*)pbuf;
+
+		for(unsigned int i=0;i<len;i++) 
+		{ // convert md to hex-represented string (hex-letters in upper case!)
+			result << std::setw(2) << std::setfill('0') 
+				<< std::setbase(16) << std::nouppercase  
+				<< (int)*p_buff++;
+		}
+
+		return result.str();
+	}
+
+  inline
+	std::string get_md5_as_hexstring(const void* pbuff, size_t len)
+	{
+		unsigned char output[16] = {0};
+		md5::md5((unsigned char*)pbuff, static_cast<unsigned int>(len), output);
+		return get_buf_as_hex_string(output, sizeof(output));
+	}
+
+  inline
+	std::string get_md5_as_hexstring(const std::string& src)
+	{
+		return get_md5_as_hexstring(src.data(), src.size());
+	}
+#endif
+
 
 }
 }

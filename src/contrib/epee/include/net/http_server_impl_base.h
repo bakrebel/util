@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,22 +22,19 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 
 
-#pragma once
+#pragma once 
 
 
 #include <boost/thread.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind.hpp> 
 
 #include "net/http_server_cp2.h"
 #include "net/http_server_handlers_map2.h"
-
-#undef FONERO_DEFAULT_LOG_CATEGORY
-#define FONERO_DEFAULT_LOG_CATEGORY "net.http"
 
 namespace epee
 {
@@ -48,15 +45,14 @@ namespace epee
 
   public:
     http_server_impl_base()
-        : m_net_server(epee::net_utils::e_connection_type_RPC)
+        : m_net_server()
     {}
 
     explicit http_server_impl_base(boost::asio::io_service& external_io_service)
         : m_net_server(external_io_service)
     {}
 
-    bool init(const std::string& bind_port = "0", const std::string& bind_ip = "0.0.0.0",
-      boost::optional<net_utils::http::login> user = boost::none)
+    bool init(const std::string& bind_port = "0", const std::string& bind_ip = "0.0.0.0")
     {
 
       //set self as callback handler
@@ -65,9 +61,7 @@ namespace epee
       //here set folder for hosting reqests
       m_net_server.get_config_object().m_folder = "";
 
-      m_net_server.get_config_object().m_user = std::move(user);
-
-      MGINFO("Binding on " << bind_ip << ":" << bind_port);
+      LOG_PRINT_L0("Binding on " << bind_ip << ":" << bind_port);
       bool res = m_net_server.init_server(bind_port, bind_ip);
       if(!res)
       {
@@ -80,14 +74,14 @@ namespace epee
     bool run(size_t threads_count, bool wait = true)
     {
       //go to loop
-      MINFO("Run net_service loop( " << threads_count << " threads)...");
+      LOG_PRINT("Run net_service loop( " << threads_count << " threads)...", LOG_LEVEL_0);
       if(!m_net_server.run_server(threads_count, wait))
       {
         LOG_ERROR("Failed to run net tcp server!");
       }
 
       if(wait)
-        MINFO("net_service loop stopped.");
+        LOG_PRINT("net_service loop stopped.", LOG_LEVEL_0);
       return true;
     }
 
@@ -112,7 +106,7 @@ namespace epee
       return m_net_server.get_binded_port();
     }
 
-  protected:
+  protected: 
     net_utils::boosted_tcp_server<net_utils::http::http_custom_handler<t_connection_context> > m_net_server;
   };
 }

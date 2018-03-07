@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,17 +22,15 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 
 
-#pragma once
+#pragma once 
 #include "http_base.h"
 #include "reg_exp_definer.h"
 
-#undef FONERO_DEFAULT_LOG_CATEGORY
-#define FONERO_DEFAULT_LOG_CATEGORY "net"
 
 namespace epee
 {
@@ -40,10 +38,10 @@ namespace net_utils
 {
 
   inline bool parse_uri_query(const std::string& query, std::list<std::pair<std::string, std::string> >& params)
-  {
+  { 
     enum state
     {
-      st_param_name,
+      st_param_name, 
       st_param_val
     };
     state st = st_param_name;
@@ -93,8 +91,8 @@ namespace net_utils
     }
     return true;
   }
-
-  inline
+  
+  inline 
     bool parse_uri(const std::string uri, http::uri_content& content)
   {
 
@@ -105,7 +103,7 @@ namespace net_utils
     boost::smatch result;	
     if(!boost::regex_search(uri, result, rexp_match_uri, boost::match_default) && result[0].matched)
     {
-      LOG_PRINT_L1("[PARSE URI] regex not matched for uri: " << uri);
+      LOG_PRINT_L0("[PARSE URI] regex not matched for uri: " << uri);
       content.m_path = uri;
       return true;
     }
@@ -129,7 +127,7 @@ namespace net_utils
   }
 
 
-  inline
+  inline 
     bool parse_url(const std::string url_str, http::url_content& content)
   {
 
@@ -141,7 +139,7 @@ namespace net_utils
     boost::smatch result;	
     if(!boost::regex_search(url_str, result, rexp_match_uri, boost::match_default) && result[0].matched)
     {
-      LOG_PRINT_L1("[PARSE URI] regex not matched for uri: " << rexp_match_uri);
+      LOG_PRINT_L0("[PARSE URI] regex not matched for uri: " << rexp_match_uri);
       //content.m_path = uri;
       return true;
     }
@@ -162,7 +160,7 @@ namespace net_utils
       content.uri = result[7];
       return parse_uri(result[7], content.m_uri_content);
     }
-
+    
     return true;
   }
 

@@ -1,6 +1,6 @@
 // Copyright (c) 2006-2013, Andrey N. Sabelnikov, www.sabelnikov.net
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // * Redistributions of source code must retain the above copyright
@@ -11,7 +11,7 @@
 // * Neither the name of the Andrey N. Sabelnikov nor the
 // names of its contributors may be used to endorse or promote products
 // derived from this software without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -22,7 +22,7 @@
 // ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 
 
 
 
@@ -37,7 +37,6 @@
 #include <ostream>
 #include <string>
 #include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/preprocessor/selection/min.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
@@ -46,9 +45,6 @@
 #include "misc_language.h"
 //#include "profile_tools.h"
 #include "../string_tools.h"
-
-#undef FONERO_DEFAULT_LOG_CATEGORY
-#define FONERO_DEFAULT_LOG_CATEGORY "net"
 
 #ifndef MAKE_IP
 #define MAKE_IP( a1, a2, a3, a4 )	(a1|(a2<<8)|(a3<<16)|(a4<<24))
@@ -85,10 +81,10 @@ namespace net_utils
 		
 	public:
 		inline
-			blocked_mode_client():m_socket(m_io_service),
-                            m_initialized(false),
-                            m_connected(false),
-                            m_deadline(m_io_service),
+			blocked_mode_client():m_socket(m_io_service), 
+                            m_initialized(false), 
+                            m_connected(false), 
+                            m_deadline(m_io_service), 
                             m_shutdowned(0)
 		{
 			
@@ -99,7 +95,7 @@ namespace net_utils
 			// No deadline is required until the first socket operation is started. We
 			// set the deadline to positive infinity so that the actor takes no action
 			// until a specific deadline is set.
-			m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+			m_deadline.expires_at(boost::posix_time::pos_infin);
 
 			// Start the persistent actor that checks for deadline expiry.
 			check_deadline();
@@ -112,16 +108,26 @@ namespace net_utils
 			shutdown();
 		}
 
+		inline void set_recv_timeout(int reciev_timeout)
+		{
+			m_reciev_timeout = reciev_timeout;
+		}
+
     inline
-      bool connect(const std::string& addr, int port, std::chrono::milliseconds timeout, const std::string& bind_ip = "0.0.0.0")
+      bool connect(const std::string& addr, int port, unsigned int connect_timeout, unsigned int reciev_timeout, const std::string& bind_ip = "0.0.0.0")
     {
-      return connect(addr, std::to_string(port), timeout, bind_ip);
+      return connect(addr, std::to_string(port), connect_timeout, reciev_timeout, bind_ip);
     }
 
     inline
-			bool connect(const std::string& addr, const std::string& port, std::chrono::milliseconds timeout, const std::string& bind_ip = "0.0.0.0")
+			bool connect(const std::string& addr, const std::string& port, unsigned int connect_timeout, unsigned int reciev_timeout, const std::string& bind_ip = "0.0.0.0")
 		{
+			m_connect_timeout = connect_timeout;
+			m_reciev_timeout = reciev_timeout;
       m_connected = false;
+			if(!m_reciev_timeout)
+				m_reciev_timeout = m_connect_timeout;
+
 			try
 			{
 				m_socket.close();
@@ -131,7 +137,7 @@ namespace net_utils
 				//////////////////////////////////////////////////////////////////////////
 
 				boost::asio::ip::tcp::resolver resolver(m_io_service);
-				boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), addr, port, boost::asio::ip::tcp::resolver::query::canonical_name);
+				boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), addr, port);
 				boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
 				boost::asio::ip::tcp::resolver::iterator end;
 				if(iterator == end)
@@ -155,7 +161,7 @@ namespace net_utils
 				}
 
 				
-				m_deadline.expires_from_now(timeout);
+				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_connect_timeout));
 
 
 				boost::system::error_code ec = boost::asio::error::would_block;
@@ -164,29 +170,29 @@ namespace net_utils
 				m_socket.async_connect(remote_endpoint, boost::lambda::var(ec) = boost::lambda::_1);
 				while (ec == boost::asio::error::would_block)
 				{	
-					m_io_service.run_one();
+					m_io_service.run_one(); 
 				}
 				
 				if (!ec && m_socket.is_open())
 				{
 					m_connected = true;
-					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+					m_deadline.expires_at(boost::posix_time::pos_infin);
 					return true;
 				}else
 				{
-					MWARNING("Some problems at connect, message: " << ec.message());
+					LOG_PRINT("Some problems at connect, message: " << ec.message(), LOG_LEVEL_3);
 					return false;
 				}
 
 			}
 			catch(const boost::system::system_error& er)
 			{
-				MDEBUG("Some problems at connect, message: " << er.what());
+				LOG_PRINT("Some problems at connect, message: " << er.what(), LOG_LEVEL_4);
 				return false;
 			}
 			catch(...)
 			{
-				MDEBUG("Some fatal problems.");
+				LOG_PRINT("Some fatal problems.", LOG_LEVEL_4);
 				return false;
 			}
 
@@ -194,7 +200,7 @@ namespace net_utils
 		}
 
 
-		inline
+		inline 
 		bool disconnect()
 		{
 			try
@@ -221,13 +227,13 @@ namespace net_utils
 		}
 
 
-		inline
-		bool send(const std::string& buff, std::chrono::milliseconds timeout)
+		inline 
+		bool send(const std::string& buff)
 		{
 
 			try
 			{
-				m_deadline.expires_from_now(timeout);
+				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -245,7 +251,7 @@ namespace net_utils
 				// Block until the asynchronous operation has completed.
 				while (ec == boost::asio::error::would_block)
 				{
-					m_io_service.run_one();
+					m_io_service.run_one(); 
 				}
 
 				if (ec)
@@ -255,7 +261,7 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+					m_deadline.expires_at(boost::posix_time::pos_infin);
 				}
 			}
 
@@ -273,7 +279,7 @@ namespace net_utils
 			return true;
 		}
 
-		inline
+		inline 
 			bool send(const void* data, size_t sz)
 		{
 			try
@@ -313,7 +319,7 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+					m_deadline.expires_at(boost::posix_time::pos_infin);
 				}
 			}
 
@@ -340,8 +346,8 @@ namespace net_utils
 			//CATCH_ENTRY_L0("is_connected", false)
 		}
 
-		inline
-		bool recv(std::string& buff, std::chrono::milliseconds timeout)
+		inline 
+		bool recv(std::string& buff)
 		{
 
 			try
@@ -349,7 +355,7 @@ namespace net_utils
 				// Set a deadline for the asynchronous operation. Since this function uses
 				// a composed operation (async_read_until), the deadline applies to the
 				// entire operation, rather than individual reads from the socket.
-				m_deadline.expires_from_now(timeout);
+				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -375,27 +381,27 @@ namespace net_utils
 				// Block until the asynchronous operation has completed.
 				while (ec == boost::asio::error::would_block && !boost::interprocess::ipcdetail::atomic_read32(&m_shutdowned))
 				{
-					m_io_service.run_one();
+					m_io_service.run_one(); 
 				}
 
 
 				if (ec)
 				{
-                    MTRACE("READ ENDS: Connection err_code " << ec.value());
+                    LOG_PRINT_L4("READ ENDS: Connection err_code " << ec.value());
                     if(ec == boost::asio::error::eof)
                     {
-                      MTRACE("Connection err_code eof.");
+                      LOG_PRINT_L4("Connection err_code eof.");
                       //connection closed there, empty
                       return true;
                     }
 
-					MDEBUG("Problems at read: " << ec.message());
+					LOG_PRINT_L3("Problems at read: " << ec.message());
                     m_connected = false;
 					return false;
 				}else
 				{
-                    MTRACE("READ ENDS: Success. bytes_tr: " << bytes_transfered);
-					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+                    LOG_PRINT_L4("READ ENDS: Success. bytes_tr: " << bytes_transfered);
+					m_deadline.expires_at(boost::posix_time::pos_infin);
 				}
 
 				/*if(!bytes_transfered)
@@ -423,7 +429,7 @@ namespace net_utils
 
 		}
 
-		inline bool recv_n(std::string& buff, int64_t sz, std::chrono::milliseconds timeout)
+		inline bool recv_n(std::string& buff, int64_t sz)
 		{
 
 			try
@@ -431,7 +437,7 @@ namespace net_utils
 				// Set a deadline for the asynchronous operation. Since this function uses
 				// a composed operation (async_read_until), the deadline applies to the
 				// entire operation, rather than individual reads from the socket.
-				m_deadline.expires_from_now(timeout);
+				m_deadline.expires_from_now(boost::posix_time::milliseconds(m_reciev_timeout));
 
 				// Set up the variable that receives the result of the asynchronous
 				// operation. The error code is set to would_block to signal that the
@@ -458,7 +464,7 @@ namespace net_utils
 				// Block until the asynchronous operation has completed.
 				while (ec == boost::asio::error::would_block && !boost::interprocess::ipcdetail::atomic_read32(&m_shutdowned))
 				{
-					m_io_service.run_one();
+					m_io_service.run_one(); 
 				}
 
 				if (ec)
@@ -468,12 +474,12 @@ namespace net_utils
 					return false;
 				}else
 				{
-					m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+					m_deadline.expires_at(boost::posix_time::pos_infin);
 				}
 
 				if(bytes_transfered != buff.size())
 				{
-					LOG_ERROR("Transferred mismatch with transfer_at_least value: m_bytes_transferred=" << bytes_transfered << " at_least value=" << buff.size());
+					LOG_ERROR("Transferred missmatch with transfer_at_least value: m_bytes_transferred=" << bytes_transfered << " at_least value=" << buff.size());
 					return false;
 				}
 
@@ -530,7 +536,7 @@ namespace net_utils
 			// Check whether the deadline has passed. We compare the deadline against
 			// the current time since a new asynchronous operation may have moved the
 			// deadline before this actor had a chance to run.
-			if (m_deadline.expires_at() <= std::chrono::steady_clock::now())
+			if (m_deadline.expires_at() <= boost::asio::deadline_timer::traits_type::now())
 			{
 				// The deadline has passed. The socket is closed so that any outstanding
 				// asynchronous operations are cancelled. This allows the blocked
@@ -541,7 +547,7 @@ namespace net_utils
 
 				// There is no longer an active deadline. The expiry is set to positive
 				// infinity so that the actor takes no action until a new deadline is set.
-				m_deadline.expires_at(std::chrono::steady_clock::time_point::max());
+				m_deadline.expires_at(boost::posix_time::pos_infin);
 			}
 
 			// Put the actor back to sleep.
@@ -553,9 +559,11 @@ namespace net_utils
 	protected:
 		boost::asio::io_service m_io_service;
 		boost::asio::ip::tcp::socket m_socket;
+		int m_connect_timeout;
+		int m_reciev_timeout;
 		bool m_initialized;
 		bool m_connected;
-		boost::asio::steady_timer m_deadline;
+		boost::asio::deadline_timer m_deadline;
 		volatile uint32_t m_shutdowned;
 	};
 
@@ -589,7 +597,7 @@ namespace net_utils
 			return true;
 		}
 
-		inline
+		inline 
 			bool send(const void* data, size_t sz)
 		{
 			try
