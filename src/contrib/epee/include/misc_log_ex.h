@@ -49,7 +49,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "easylogging++.h"
+
 
 #define FONERO_DEFAULT_LOG_CATEGORY "default"
 
